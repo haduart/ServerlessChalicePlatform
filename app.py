@@ -1,29 +1,33 @@
 from chalice import Chalice
+import boto3
+import decimal
 
 app = Chalice(app_name='platform')
+
+@app.lambda_function()
+def realtime_lambda_function(event, context):
+    app.log.debug("This call is from the Lambda")
+    dynamodb = boto3.resource('dynamodb')
+    table = dynamodb.Table('Movies')
+
+    title = "The Big New Movie"
+    year = 2015
+
+    response = table.put_item(
+        Item={
+            'title': title,
+            'year': year,
+            'info': {
+                'plot': "Nothing happens at all.",
+                'rating': decimal.Decimal(0)
+            }
+        }
+    )
+    app.log.debug("Data persisted")
+    return response
 
 
 @app.route('/')
 def index():
-    return {'hello': 'world'}
-
-
-# The view function above will return {"hello": "world"}
-# whenever you make an HTTP GET request to '/'.
-#
-# Here are a few more examples:
-#
-# @app.route('/hello/{name}')
-# def hello_name(name):
-#    # '/hello/james' -> {"hello": "james"}
-#    return {'hello': name}
-#
-# @app.route('/users', methods=['POST'])
-# def create_user():
-#     # This is the JSON body the user sent in their POST request.
-#     user_as_json = app.current_request.json_body
-#     # We'll echo the json body back to the user in a 'user' key.
-#     return {'user': user_as_json}
-#
-# See the README documentation for more examples.
-#
+    app.log.debug("This call is from the API Gateway")
+    return realtime_lambda_function(None, None)

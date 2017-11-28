@@ -13,3 +13,4 @@ rpmbuild/
 *.tar.gz
 target/
 .chalice/deployments/
+env/
