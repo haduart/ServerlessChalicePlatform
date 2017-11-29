@@ -1,1 +1,17 @@
-{}
+{
+  "dev": {
+    "api_handler_name": "platform-dev",
+    "api_handler_arn": "arn:aws:lambda:eu-west-1:488643450383:function:platform-dev",
+    "lambda_functions": {
+      "platform-dev-realtime_lambda_function": {
+        "arn": "arn:aws:lambda:eu-west-1:488643450383:function:platform-dev-realtime_lambda_function",
+        "type": "pure_lambda"
+      }
+    },
+    "backend": "api",
+    "chalice_version": "1.0.4",
+    "rest_api_id": "kx8a6q935d",
+    "api_gateway_stage": "api",
+    "region": "eu-west-1"
+  }
+}

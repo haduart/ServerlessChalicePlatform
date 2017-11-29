@@ -1,14 +1,19 @@
-from chalice import Chalice
+from chalice import Chalice, NotFoundError, Response
 import boto3
-import decimal
+import logging
 
 app = Chalice(app_name='platform')
+
+app.log.setLevel(logging.DEBUG)
+app.debug = True
+
+MOVIE_TABLE = 'Movies'
+table = boto3.resource('dynamodb').Table(MOVIE_TABLE)
+
 
 @app.lambda_function()
 def realtime_lambda_function(event, context):
     app.log.debug("This call is from the Lambda")
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('Movies')
 
     title = "The Big New Movie"
     year = 2015
@@ -19,15 +24,38 @@ def realtime_lambda_function(event, context):
             'year': year,
             'info': {
                 'plot': "Nothing happens at all.",
-                'rating': decimal.Decimal(0)
+                'rating': "0"
             }
         }
     )
-    app.log.debug("Data persisted")
-    return response
+    app.log.debug("print: Data persisted")
+    return "test"
+
+
+@app.route('/lambda')
+def insert_data_in_lambda():
+    return realtime_lambda_function(None, None)
 
 
 @app.route('/')
 def index():
-    app.log.debug("This call is from the API Gateway")
-    return realtime_lambda_function(None, None)
+    print("print: This call is from the API Gateway")
+    return Response(body='hello world!',
+                    status_code=200,
+                    headers={'Content-Type': 'text/plain'})
+
+
+OBJECTS = {
+}
+
+
+@app.route('/objects/{key}', methods=['GET', 'PUT'])
+def myobject(key):
+    request = app.current_request
+    if request.method == 'PUT':
+        OBJECTS[key] = request.json_body
+    elif request.method == 'GET':
+        try:
+            return {key: OBJECTS[key]}
+        except KeyError:
+            raise NotFoundError(key)
