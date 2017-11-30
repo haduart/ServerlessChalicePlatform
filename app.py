@@ -1,4 +1,5 @@
 from chalice import Chalice, NotFoundError, Response
+import os
 import boto3
 import logging
 
@@ -7,7 +8,7 @@ app = Chalice(app_name='platform')
 app.log.setLevel(logging.DEBUG)
 app.debug = True
 
-MOVIE_TABLE = 'Movies'
+MOVIE_TABLE = os.getenv('APP_TABLE_NAME', 'Movies6')
 table = boto3.resource('dynamodb').Table(MOVIE_TABLE)
 
 
@@ -43,6 +44,12 @@ def index():
     return Response(body='hello world!',
                     status_code=200,
                     headers={'Content-Type': 'text/plain'})
+
+
+@app.route('/roberto')
+def roberto_function():
+    app.log.debug("logging per la funcio del roberto")
+    return {"hola": "roberto"}
 
 
 OBJECTS = {
