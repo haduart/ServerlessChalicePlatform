@@ -7,7 +7,6 @@
 html_env
 bin/
 include/
-lib/
 pip-selfcheck.json
 rpmbuild/
 *.tar.gz
