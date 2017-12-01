@@ -4,6 +4,16 @@
     {
       "Effect": "Allow",
       "Action": [
+        "sns:Publish"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Sid": "41ade5c612af498ab53b78882167ec33"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
         "logs:CreateLogGroup",
         "logs:CreateLogStream",
         "logs:PutLogEvents"

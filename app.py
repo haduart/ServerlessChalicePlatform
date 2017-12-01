@@ -8,34 +8,48 @@ app = Chalice(app_name='platform')
 app.log.setLevel(logging.DEBUG)
 app.debug = True
 
-MOVIE_TABLE = os.getenv('APP_TABLE_NAME', 'Movies6')
+MOVIE_TABLE = os.getenv('APP_TABLE_NAME', 'defaultTable')
+SNS_TOPIC = os.getenv('SNS_TOPIC', 'defaultSNS')
+
 table = boto3.resource('dynamodb').Table(MOVIE_TABLE)
+sns_client = boto3.client('sns')
 
 
 @app.lambda_function()
 def realtime_lambda_function(event, context):
+    # print("Received event: " + json.dumps(event, indent=2))
     app.log.debug("This call is from the Lambda")
+    app.log.debug("From SNS: " + event)
 
     title = "The Big New Movie"
     year = 2015
 
-    response = table.put_item(
-        Item={
-            'title': title,
-            'year': year,
-            'info': {
-                'plot': "Nothing happens at all.",
-                'rating': "0"
+    try:
+        response = table.put_item(
+            Item={
+                'title': title,
+                'year': year,
+                'info': {
+                    'plot': "Nothing happens at all.",
+                    'rating': "0"
+                }
             }
-        }
-    )
+        )
+    except Exception as e:
+        raise NotFoundError("Error adding an element on dynamodb")
+
     app.log.debug("print: Data persisted")
     return "test"
 
 
 @app.route('/lambda')
 def insert_data_in_lambda():
-    return realtime_lambda_function(None, None)
+    sns_client.publish(
+        TopicArn="arn:aws:sns:eu-west-1:488643450383:defaultSNS",
+        Subject="Test from Lambda",
+        Message="Good news everyone!"
+    )
+    return {"Published Event": "defaultSNS"}
 
 
 @app.route('/')
