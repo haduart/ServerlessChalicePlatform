@@ -19,7 +19,7 @@ sns_client = boto3.client('sns')
 def realtime_lambda_function(event, context):
     # print("Received event: " + json.dumps(event, indent=2))
     app.log.debug("This call is from the Lambda")
-    app.log.debug("From SNS: " + event)
+    # app.log.debug("From SNS: " + event)
 
     title = "The Big New Movie"
     year = 2015
