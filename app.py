@@ -1,7 +1,17 @@
+"""
+Here we have all the lambda definitions and Gateway calls
+
+
+@author: Eduard Cespedes Borràs
+@mail: eduard@iot-partners.com
+"""
+
 from chalice import Chalice, NotFoundError, Response
+import json
 import os
 import boto3
 import logging
+from chalicelib.server import Server
 
 app = Chalice(app_name='platform')
 
@@ -14,42 +24,22 @@ SNS_TOPIC = os.getenv('SNS_TOPIC', 'defaultSNS')
 table = boto3.resource('dynamodb').Table(MOVIE_TABLE)
 sns_client = boto3.client('sns')
 
+server = Server(table, sns_client, app.log)
+
 
 @app.lambda_function()
 def realtime_lambda_function(event, context):
     # print("Received event: " + json.dumps(event, indent=2))
     app.log.debug("This call is from the Lambda")
     # app.log.debug("From SNS: " + event)
-
-    title = "The Big New Movie"
-    year = 2015
-
-    try:
-        response = table.put_item(
-            Item={
-                'title': title,
-                'year': year,
-                'info': {
-                    'plot': "Nothing happens at all.",
-                    'rating': "0"
-                }
-            }
-        )
-    except Exception as e:
-        raise NotFoundError("Error adding an element on dynamodb")
-
-    app.log.debug("print: Data persisted")
+    server.persist_data(event, context)
     return "test"
 
 
 @app.route('/lambda')
 def insert_data_in_lambda():
-    sns_client.publish(
-        TopicArn="arn:aws:sns:eu-west-1:488643450383:defaultSNS",
-        Subject="Test from Lambda",
-        Message="Good news everyone!"
-    )
-    return {"Published Event": "defaultSNS"}
+    app.log.debug("insert_data_in_lambda")
+    return server.publish_data()
 
 
 @app.route('/')
@@ -60,23 +50,12 @@ def index():
                     headers={'Content-Type': 'text/plain'})
 
 
-@app.route('/roberto')
-def roberto_function():
-    app.log.debug("logging per la funcio del roberto")
-    return {"hola": "roberto"}
-
-
-OBJECTS = {
-}
-
-
-@app.route('/objects/{key}', methods=['GET', 'PUT'])
-def myobject(key):
-    request = app.current_request
-    if request.method == 'PUT':
-        OBJECTS[key] = request.json_body
-    elif request.method == 'GET':
-        try:
-            return {key: OBJECTS[key]}
-        except KeyError:
-            raise NotFoundError(key)
+@app.route('/lora', methods=['POST', 'PUT'])
+def lora():
+    try:
+        request = app.current_request
+        jsonbody = json.loads(request.json_body)
+        app.log.debug(jsonbody)
+        return "It worked"
+    except KeyError:
+            raise NotFoundError()

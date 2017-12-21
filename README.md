@@ -80,3 +80,9 @@ Deleting cloud watch events
 Delete the role platform-dev? [y/N]: y
 Deleting role name helloworld-dev
 ```
+
+### Using Unittest
+```commandline
+$ pip install unittest2
+$ python -m unittest 
+```
