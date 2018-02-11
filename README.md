@@ -36,13 +36,18 @@ Creating virtual environment
  $ source chalice-env/bin/activate
 ```
 
-And finally install AWS Chalice
+Install AWS Chalice
 ```commandline
  $ pip install chalice
  ```
 Or 
 ```commandline
  $ sudo python -m pip install -U chalice
+```
+
+Install all the requirements
+```commandline
+ $ pip install -r requirements.txt
 ```
 
 ### Using AWS Chalice
